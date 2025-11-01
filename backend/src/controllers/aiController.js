@@ -1,69 +1,15 @@
+// backend/src/controllers/aiController.js
+
 const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-// Initialize AI client.
-// Prefer a lightweight fetch-based client for local Ollama (no API key required).
-// Otherwise instantiate the OpenAI client when an API key is available.
-let client;
-
-const usingLocalOllama = !!(process.env.AI_BASE_URL && process.env.AI_BASE_URL.includes('localhost:11434'));
-const AI_TIMEOUT_MS = parseInt(process.env.AI_REQUEST_TIMEOUT_MS || '120000', 10); // default 2 minutes
-
-if (usingLocalOllama && !(process.env.AI_API_KEY || process.env.OPENAI_API_KEY)) {
-  // Create a minimal fetch-based client that mimics the OpenAI client's
-  // chat.completions.create(params) interface and forwards requests to Ollama.
-  client = {
-    chat: {
-      completions: {
-        create: async (params) => {
-          const base = process.env.AI_BASE_URL.replace(/\/$/, '');
-          const url = `${base}/chat/completions`;
-
-          // Use AbortController to implement a timeout for slow model loads
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
-
-          let res;
-          try {
-            // Use the global fetch available in recent Node versions
-            res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(params),
-              signal: controller.signal,
-            });
-          } catch (err) {
-            if (err.name === 'AbortError') {
-              const e = new Error(`AI request aborted after ${AI_TIMEOUT_MS}ms`);
-              e.response = { data: 'timeout' };
-              throw e;
-            }
-            throw err;
-          } finally {
-            clearTimeout(timeout);
-          }
-
-          if (!res.ok) {
-            const text = await res.text();
-            const err = new Error(`AI API error: ${res.status} ${text}`);
-            err.response = { data: text };
-            throw err;
-          }
-
-          return res.json();
-        }
-      }
-    }
-  };
-} else {
-  const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
-  client = new OpenAI({
-    apiKey,
-    baseURL: process.env.AI_BASE_URL,
-  });
-}
+// Initialize OpenAI/Groq client
+const client = new OpenAI({
+  apiKey: process.env.AI_API_KEY,
+  baseURL: process.env.AI_BASE_URL,
+});
 
 // Load extraction prompt
 const getExtractionPrompt = () => {
@@ -71,37 +17,34 @@ const getExtractionPrompt = () => {
     const promptPath = path.join(__dirname, '../../prompts/extraction.md');
     return fs.readFileSync(promptPath, 'utf-8');
   } catch (error) {
-    // Fallback prompt if file not found
+    // fallback prompt
     return `You are an expert at extracting structured information from messages. Extract contact details (name, email, phone), channel, language, intent, priority (low/medium/high), entities (dates, amounts, locations), and generate a reply suggestion in the detected language (2-5 sentences). Return ONLY valid JSON.`;
   }
 };
 
-// Priority detection rule (applied before/after AI extraction)
+// Rule-based priority detection
 const detectPriorityRule = (messageText) => {
   const text = messageText.toLowerCase();
-  
-  // High priority indicators
+
   if (/\b(urgent|asap|immediately|emergency|critical|urgente|عاجل|طارئ)\b/i.test(text)) {
     return 'high';
   }
-  
-  // Check for dates within next 48 hours
+
   const now = new Date();
   const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
-  
-  // Simple date pattern matching (can be enhanced)
+
   const datePatterns = [
     /(today|tomorrow|الآن|اليوم|غدا)/i,
-    /\b(\d{1,2})\/(\d{1,2})\b/, // MM/DD or DD/MM
-    /\b(\d{1,2})-(\d{1,2})\b/,  // MM-DD or DD-MM
+    /\b(\d{1,2})\/(\d{1,2})\b/,
+    /\b(\d{1,2})-(\d{1,2})\b/,
   ];
-  
+
   for (const pattern of datePatterns) {
     if (pattern.test(text)) {
       return 'medium';
     }
   }
-  
+
   return 'low';
 };
 
@@ -117,7 +60,6 @@ const validateExtractedData = (data) => {
     reply_suggestion: ''
   };
 
-  // Ensure required fields exist
   if (!data.contact) data.contact = schema.contact;
   if (!data.channel) data.channel = schema.channel;
   if (!data.language) data.language = schema.language;
@@ -126,52 +68,37 @@ const validateExtractedData = (data) => {
   if (!Array.isArray(data.entities)) data.entities = [];
   if (!data.reply_suggestion) data.reply_suggestion = '';
 
-  // Validate channel
   const validChannels = ['email', 'whatsapp', 'sms', 'chat', 'unknown'];
-  if (!validChannels.includes(data.channel)) {
-    data.channel = 'unknown';
-  }
+  if (!validChannels.includes(data.channel)) data.channel = 'unknown';
 
-  // Validate priority
   const validPriorities = ['low', 'medium', 'high'];
-  if (!validPriorities.includes(data.priority)) {
-    data.priority = 'low';
-  }
+  if (!validPriorities.includes(data.priority)) data.priority = 'low';
 
-  // Ensure contact object has all fields
   if (!data.contact.name) data.contact.name = null;
   if (!data.contact.email) data.contact.email = null;
   if (!data.contact.phone) data.contact.phone = null;
 
-  // Validate email format if present
   if (data.contact.email) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.contact.email)) {
-      data.contact.email = null;
-    }
+    if (!emailRegex.test(data.contact.email)) data.contact.email = null;
   }
 
   return data;
 };
 
+// Main extraction controller
 exports.extractTicket = async (req, res) => {
   try {
     const { message } = req.body;
 
     if (!message || typeof message !== 'string' || message.trim().length === 0) {
-      return res.status(400).json({
-        error: 'Message is required and must be a non-empty string'
-      });
+      return res.status(400).json({ error: 'Message is required and must be a non-empty string' });
     }
 
-    // Apply rule-based priority detection first
     const ruleBasedPriority = detectPriorityRule(message);
-
-    // Prepare AI prompt
     const systemPrompt = getExtractionPrompt();
     const userPrompt = `Extract fields from this message:\n\n${message}`;
 
-    // Call AI API (works with both Groq/OpenAI and Ollama)
     const requestParams = {
       model: process.env.AI_MODEL,
       messages: [
@@ -179,93 +106,36 @@ exports.extractTicket = async (req, res) => {
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.2,
+      response_format: { type: 'json_object' }
     };
 
-    // Ollama supports JSON mode, but some models need it specified differently
-    if (process.env.AI_BASE_URL?.includes('localhost:11434')) {
-      // For Ollama, ensure JSON format is requested in the prompt
-      requestParams.response_format = { type: 'json_object' };
-    } else {
-      // For Groq/OpenAI, use standard JSON mode
-      requestParams.response_format = { type: 'json_object' };
-    }
-
-    const providerName = usingLocalOllama ? 'ollama' : 'openai';
-    console.log(`Calling AI provider: ${providerName} model=${process.env.AI_MODEL}`);
-
+    console.log(`Calling AI provider: Groq/OpenAI model=${process.env.AI_MODEL}`);
     const startTs = Date.now();
-    let completion;
-    try {
-      completion = await client.chat.completions.create(requestParams);
-    } catch (err) {
-      const elapsed = Date.now() - startTs;
-      console.error(`AI provider ${providerName} error after ${elapsed}ms:`, err.message || err);
-      throw err;
-    }
-    const duration = Date.now() - startTs;
-    console.log(`AI provider ${providerName} responded in ${duration}ms`);
 
+    const completion = await client.chat.completions.create(requestParams);
+    const duration = Date.now() - startTs;
+    console.log(`AI provider responded in ${duration}ms`);
+
+    // Parse AI response
     let extractedData;
     try {
-      // Support multiple response shapes from different providers (stringified JSON, JSON object, etc.)
-      const choice = completion?.choices && completion.choices[0];
-      let aiResponse = undefined;
+      const choice = completion?.choices?.[0];
+      let aiResponse = choice?.message?.content || choice?.content || completion;
 
-      if (choice) {
-        // Common shapes:
-        // - { message: { content: '...string...' } }
-        // - { message: { content: { ... } } }
-        // - { content: '...string...' }
-        if (choice.message && choice.message.content !== undefined) {
-          aiResponse = choice.message.content;
-        } else if (choice.content !== undefined) {
-          aiResponse = choice.content;
-        }
+      if (typeof aiResponse === 'string') {
+        extractedData = JSON.parse(aiResponse);
       } else {
-        // Fallback: maybe the provider returned the object directly
-        aiResponse = completion;
-      }
-
-      // If the AI returned an object already, use it directly
-      if (typeof aiResponse === 'object') {
         extractedData = aiResponse;
-      } else if (typeof aiResponse === 'string') {
-        // Sometimes the model returns plain text with JSON embedded; try to parse
-        try {
-          extractedData = JSON.parse(aiResponse);
-        } catch (e) {
-          // Try to extract JSON substring from the string
-          const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            extractedData = JSON.parse(jsonMatch[0]);
-          } else {
-            throw new Error('AI response was a string but not valid JSON');
-          }
-        }
-      } else {
-        throw new Error('Unsupported AI response format');
       }
     } catch (parseError) {
-      // Log the full completion for debugging (don't send huge blobs to client)
-      try {
-        console.error('Error parsing AI response. completion object:', JSON.stringify(completion).slice(0, 2000));
-      } catch (e) {
-        console.error('Error parsing AI response and could not stringify completion object', e);
-      }
-
-      console.error('Parse error:', parseError);
-      return res.status(500).json({
-        error: 'Failed to parse AI response. Please check server logs for provider output.',
-        details: parseError.message
-      });
+      console.error('Error parsing AI response:', parseError);
+      return res.status(500).json({ error: 'Failed to parse AI response', details: parseError.message });
     }
 
-    // Validate and normalize extracted data
     extractedData = validateExtractedData(extractedData);
 
-    // Transform contact object to flat structure for database
+    // Flatten contact object for DB
     const flatData = {
-      ...extractedData,
       contact_name: extractedData.contact?.name || null,
       contact_email: extractedData.contact?.email || null,
       contact_phone: extractedData.contact?.phone || null,
@@ -278,16 +148,11 @@ exports.extractTicket = async (req, res) => {
       reply_suggestion: extractedData.reply_suggestion || ''
     };
 
-    // Apply priority rule: if rule-based is 'high', use it; otherwise use AI's priority if it's higher than rule-based
-    if (ruleBasedPriority === 'high' || 
-        (ruleBasedPriority === 'medium' && flatData.priority === 'low')) {
+    // Apply rule-based priority override
+    if (ruleBasedPriority === 'high' || (ruleBasedPriority === 'medium' && flatData.priority === 'low')) {
       flatData.priority = ruleBasedPriority;
     }
 
-    // Remove nested contact object as we've flattened it
-    delete flatData.contact;
-
-    // Log which parts are rule-based vs AI-based
     console.log(`Priority: ${flatData.priority} (Rule-based: ${ruleBasedPriority}, AI: ${extractedData.priority})`);
 
     res.json({
@@ -301,18 +166,9 @@ exports.extractTicket = async (req, res) => {
 
   } catch (error) {
     console.error('Error in extractTicket:', error);
-    
-    if (error.response) {
-      return res.status(500).json({
-        error: 'AI API error',
-        details: error.response.data || error.message
-      });
-    }
-
     res.status(500).json({
       error: 'Internal server error',
       details: error.message
     });
   }
 };
-
