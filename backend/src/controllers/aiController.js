@@ -3,11 +3,67 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-// Initialize OpenAI client with Groq (or any OpenAI-compatible provider)
-const client = new OpenAI({
-  apiKey: process.env.AI_API_KEY,
-  baseURL: process.env.AI_BASE_URL,
-});
+// Initialize AI client.
+// Prefer a lightweight fetch-based client for local Ollama (no API key required).
+// Otherwise instantiate the OpenAI client when an API key is available.
+let client;
+
+const usingLocalOllama = !!(process.env.AI_BASE_URL && process.env.AI_BASE_URL.includes('localhost:11434'));
+const AI_TIMEOUT_MS = parseInt(process.env.AI_REQUEST_TIMEOUT_MS || '120000', 10); // default 2 minutes
+
+if (usingLocalOllama && !(process.env.AI_API_KEY || process.env.OPENAI_API_KEY)) {
+  // Create a minimal fetch-based client that mimics the OpenAI client's
+  // chat.completions.create(params) interface and forwards requests to Ollama.
+  client = {
+    chat: {
+      completions: {
+        create: async (params) => {
+          const base = process.env.AI_BASE_URL.replace(/\/$/, '');
+          const url = `${base}/chat/completions`;
+
+          // Use AbortController to implement a timeout for slow model loads
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
+          let res;
+          try {
+            // Use the global fetch available in recent Node versions
+            res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(params),
+              signal: controller.signal,
+            });
+          } catch (err) {
+            if (err.name === 'AbortError') {
+              const e = new Error(`AI request aborted after ${AI_TIMEOUT_MS}ms`);
+              e.response = { data: 'timeout' };
+              throw e;
+            }
+            throw err;
+          } finally {
+            clearTimeout(timeout);
+          }
+
+          if (!res.ok) {
+            const text = await res.text();
+            const err = new Error(`AI API error: ${res.status} ${text}`);
+            err.response = { data: text };
+            throw err;
+          }
+
+          return res.json();
+        }
+      }
+    }
+  };
+} else {
+  const apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
+  client = new OpenAI({
+    apiKey,
+    baseURL: process.env.AI_BASE_URL,
+  });
+}
 
 // Load extraction prompt
 const getExtractionPrompt = () => {
@@ -115,7 +171,7 @@ exports.extractTicket = async (req, res) => {
     const systemPrompt = getExtractionPrompt();
     const userPrompt = `Extract fields from this message:\n\n${message}`;
 
-    // Call AI API (works with both Groq and Ollama)
+    // Call AI API (works with both Groq/OpenAI and Ollama)
     const requestParams = {
       model: process.env.AI_MODEL,
       messages: [
@@ -134,16 +190,72 @@ exports.extractTicket = async (req, res) => {
       requestParams.response_format = { type: 'json_object' };
     }
 
-    const completion = await client.chat.completions.create(requestParams);
+    const providerName = usingLocalOllama ? 'ollama' : 'openai';
+    console.log(`Calling AI provider: ${providerName} model=${process.env.AI_MODEL}`);
+
+    const startTs = Date.now();
+    let completion;
+    try {
+      completion = await client.chat.completions.create(requestParams);
+    } catch (err) {
+      const elapsed = Date.now() - startTs;
+      console.error(`AI provider ${providerName} error after ${elapsed}ms:`, err.message || err);
+      throw err;
+    }
+    const duration = Date.now() - startTs;
+    console.log(`AI provider ${providerName} responded in ${duration}ms`);
 
     let extractedData;
     try {
-      const aiResponse = completion.choices[0].message.content;
-      extractedData = JSON.parse(aiResponse);
+      // Support multiple response shapes from different providers (stringified JSON, JSON object, etc.)
+      const choice = completion?.choices && completion.choices[0];
+      let aiResponse = undefined;
+
+      if (choice) {
+        // Common shapes:
+        // - { message: { content: '...string...' } }
+        // - { message: { content: { ... } } }
+        // - { content: '...string...' }
+        if (choice.message && choice.message.content !== undefined) {
+          aiResponse = choice.message.content;
+        } else if (choice.content !== undefined) {
+          aiResponse = choice.content;
+        }
+      } else {
+        // Fallback: maybe the provider returned the object directly
+        aiResponse = completion;
+      }
+
+      // If the AI returned an object already, use it directly
+      if (typeof aiResponse === 'object') {
+        extractedData = aiResponse;
+      } else if (typeof aiResponse === 'string') {
+        // Sometimes the model returns plain text with JSON embedded; try to parse
+        try {
+          extractedData = JSON.parse(aiResponse);
+        } catch (e) {
+          // Try to extract JSON substring from the string
+          const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            extractedData = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('AI response was a string but not valid JSON');
+          }
+        }
+      } else {
+        throw new Error('Unsupported AI response format');
+      }
     } catch (parseError) {
-      console.error('Error parsing AI response:', parseError);
+      // Log the full completion for debugging (don't send huge blobs to client)
+      try {
+        console.error('Error parsing AI response. completion object:', JSON.stringify(completion).slice(0, 2000));
+      } catch (e) {
+        console.error('Error parsing AI response and could not stringify completion object', e);
+      }
+
+      console.error('Parse error:', parseError);
       return res.status(500).json({
-        error: 'Failed to parse AI response. Please try again.',
+        error: 'Failed to parse AI response. Please check server logs for provider output.',
         details: parseError.message
       });
     }
