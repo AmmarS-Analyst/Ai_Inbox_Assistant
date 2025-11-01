@@ -115,16 +115,26 @@ exports.extractTicket = async (req, res) => {
     const systemPrompt = getExtractionPrompt();
     const userPrompt = `Extract fields from this message:\n\n${message}`;
 
-    // Call AI API
-    const completion = await client.chat.completions.create({
+    // Call AI API (works with both Groq and Ollama)
+    const requestParams = {
       model: process.env.AI_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.2,
-      response_format: { type: 'json_object' }
-    });
+    };
+
+    // Ollama supports JSON mode, but some models need it specified differently
+    if (process.env.AI_BASE_URL?.includes('localhost:11434')) {
+      // For Ollama, ensure JSON format is requested in the prompt
+      requestParams.response_format = { type: 'json_object' };
+    } else {
+      // For Groq/OpenAI, use standard JSON mode
+      requestParams.response_format = { type: 'json_object' };
+    }
+
+    const completion = await client.chat.completions.create(requestParams);
 
     let extractedData;
     try {

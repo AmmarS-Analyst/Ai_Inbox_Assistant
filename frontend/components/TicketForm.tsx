@@ -57,7 +57,7 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
@@ -65,11 +65,11 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
       {/* Status and Priority */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Status</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Status</label>
           <select
             value={formData.status || 'open'}
             onChange={(e) => handleChange('status', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
           >
             <option value="open">Open</option>
             <option value="closed">Closed</option>
@@ -77,11 +77,11 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Priority</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Priority</label>
           <select
             value={formData.priority || 'low'}
             onChange={(e) => handleChange('priority', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -92,33 +92,33 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
 
       {/* Contact Information */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Contact Information</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Contact Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Name</label>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Name</label>
             <input
               type="text"
               value={formData.contact_name || ''}
               onChange={(e) => handleChange('contact_name', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Email</label>
             <input
               type="email"
               value={formData.contact_email || ''}
               onChange={(e) => handleChange('contact_email', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Phone</label>
+            <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Phone</label>
             <input
               type="tel"
               value={formData.contact_phone || ''}
               onChange={(e) => handleChange('contact_phone', e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
             />
           </div>
         </div>
@@ -127,11 +127,11 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
       {/* Channel and Language */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2">Channel</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Channel</label>
           <select
             value={formData.channel || 'unknown'}
             onChange={(e) => handleChange('channel', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
           >
             <option value="email">Email</option>
             <option value="whatsapp">WhatsApp</option>
@@ -142,12 +142,12 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Language</label>
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Language</label>
           <input
             type="text"
             value={formData.language || 'en'}
             onChange={(e) => handleChange('language', e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
             placeholder="en, ar, fr, etc."
           />
         </div>
@@ -155,12 +155,12 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
 
       {/* Intent */}
       <div>
-        <label className="block text-sm font-medium mb-2">Intent</label>
+        <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Intent</label>
         <input
           type="text"
           value={formData.intent || ''}
           onChange={(e) => handleChange('intent', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
           placeholder="e.g., billing question, maintenance request"
         />
       </div>
@@ -168,14 +168,14 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
       {/* Entities */}
       {formData.entities && formData.entities.length > 0 && (
         <div>
-          <label className="block text-sm font-medium mb-2">Extracted Entities</label>
-          <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Extracted Entities</label>
+          <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg space-y-2 border border-gray-200 dark:border-slate-700">
             {formData.entities.map((entity, idx) => (
               <div key={idx} className="flex items-center gap-2">
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded text-sm font-medium">
                   {entity.type}
                 </span>
-                <span className="text-gray-700">{entity.value}</span>
+                <span className="text-gray-700 dark:text-gray-300">{entity.value}</span>
               </div>
             ))}
           </div>
@@ -184,23 +184,23 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
 
       {/* Original Message */}
       <div>
-        <label className="block text-sm font-medium mb-2">Original Message</label>
+        <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Original Message</label>
         <textarea
           value={formData.message_raw || ''}
           onChange={(e) => handleChange('message_raw', e.target.value)}
           rows={6}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
         />
       </div>
 
       {/* Reply Suggestion */}
       <div>
-        <label className="block text-sm font-medium mb-2">Reply Suggestion</label>
+        <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Reply Suggestion</label>
         <textarea
           value={formData.reply_suggestion || ''}
           onChange={(e) => handleChange('reply_suggestion', e.target.value)}
           rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100"
           dir={formData.language === 'ar' ? 'rtl' : 'ltr'}
         />
       </div>
@@ -210,7 +210,7 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-6 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md transition-all"
         >
           {loading ? 'Saving...' : ticket?.id ? 'Update Ticket' : 'Save Ticket'}
         </button>
@@ -218,7 +218,7 @@ export default function TicketForm({ ticket, onSave, onCancel }: TicketFormProps
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400"
+            className="px-6 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors"
           >
             Cancel
           </button>

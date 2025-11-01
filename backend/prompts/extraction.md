@@ -4,6 +4,8 @@ You are an expert at extracting structured information from messy incoming messa
 
 ## Instructions
 
+IMPORTANT: You MUST return ONLY valid JSON. No markdown, no code blocks, just pure JSON.
+
 Extract the following fields from the user's message and return ONLY valid JSON:
 
 1. **contact** (object):
@@ -77,10 +79,13 @@ Output:
 
 ## Important Rules
 
-- Return ONLY valid JSON, no extra text
+- Return ONLY valid JSON, no extra text, no markdown code blocks, just pure JSON
+- Start your response directly with { and end with }
 - Do not hallucinate contact details - if not present, use null
 - Detect language accurately and generate reply in the same language
 - Extract entities accurately - dates should be in ISO format (YYYY-MM-DD) when possible
 - Priority should reflect urgency indicators in the message
 - Keep reply_suggestion professional and helpful, 2-5 sentences
+
+REMEMBER: Your response must be valid JSON that can be parsed with JSON.parse(). Do not wrap it in markdown or add any explanations.
 

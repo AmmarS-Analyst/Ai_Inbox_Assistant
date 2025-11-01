@@ -52,7 +52,7 @@ export default function TicketDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center transition-colors duration-200">
         <Loader />
       </div>
     );
@@ -60,14 +60,14 @@ export default function TicketDetailPage() {
 
   if (error || !ticket) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-200">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
             {error || 'Ticket not found'}
           </div>
           <button
             onClick={() => router.push('/tickets')}
-            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            className="mt-4 px-4 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
           >
             Back to Tickets
           </button>
@@ -77,18 +77,18 @@ export default function TicketDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-200">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="mb-6">
           <button
             onClick={() => router.push('/tickets')}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 mb-4"
+            className="px-4 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 mb-4 transition-colors"
           >
             ← Back to Tickets
           </button>
-          <h1 className="text-3xl font-bold">Edit Ticket #{ticket.id}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Edit Ticket #{ticket.id}</h1>
         </div>
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-slate-700 transition-colors">
           <TicketForm ticket={ticket} onSave={handleSave} onCancel={handleCancel} />
         </div>
       </div>
