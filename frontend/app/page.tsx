@@ -121,7 +121,7 @@ export default function Home() {
 
           {!showForm ? (
             /* Message Input */
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-slate-700 transition-colors">
+            <div className="card p-8">
               <div className="space-y-4">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
                   {t.pasteMessage}
@@ -162,7 +162,7 @@ export default function Home() {
           ) : extractedTicket ? (
             /* Ticket Form */
             <div className="space-y-6">
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-8 border border-gray-200 dark:border-slate-700 transition-colors">
+              <div className="card p-8">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t.editBeforeSave}</h2>
                   <button

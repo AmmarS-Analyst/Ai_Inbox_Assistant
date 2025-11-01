@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useLayoutEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -12,54 +12,40 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    // Check localStorage or system preference
+  // Initialize synchronously from localStorage or system preference to avoid theme flash
+  const getInitialTheme = (): Theme => {
     try {
-      const savedTheme = localStorage.getItem('theme') as Theme;
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      const initialTheme = savedTheme || systemTheme;
-      setTheme(initialTheme);
-      applyTheme(initialTheme);
+      const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') as Theme | null : null;
+      if (saved === 'light' || saved === 'dark') return saved;
+      const system = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      return system;
     } catch (e) {
-      // localStorage might not be available
-      applyTheme('light');
-    }
-  }, []);
-
-  const applyTheme = (newTheme: Theme) => {
-    if (typeof document !== 'undefined') {
-      const root = document.documentElement;
-      if (newTheme === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
+      return 'light';
     }
   };
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    try {
-      localStorage.setItem('theme', newTheme);
-    } catch (e) {
-      // localStorage might not be available
-    }
-    applyTheme(newTheme);
-  };
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  // Provide default context even when not mounted to prevent errors
+  // Apply theme synchronously before paint to reduce flicker
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      // ignore
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+
   const contextValue = { theme, toggleTheme };
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

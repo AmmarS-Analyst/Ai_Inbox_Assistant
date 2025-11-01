@@ -99,8 +99,8 @@ export default function TicketList() {
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 transition-colors">
+  {/* Filters */}
+  <div className="p-4 card">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Search</label>
@@ -174,8 +174,8 @@ export default function TicketList() {
       )}
 
       {/* Tickets List */}
-      {tickets.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        {tickets.length === 0 ? (
+        <div className="text-center py-12 muted">
           No tickets found. Create your first ticket by analyzing a message.
         </div>
       ) : (
@@ -183,7 +183,7 @@ export default function TicketList() {
           {tickets.map((ticket) => (
             <div
               key={ticket.id}
-              className="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 hover:shadow-xl transition-shadow"
+              className="p-6 card"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
