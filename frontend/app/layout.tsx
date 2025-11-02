@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '@/components/Providers'
 import { Inter, Outfit, Space_Grotesk } from 'next/font/google'
-import Nav from '@/components/Nav'
+import AppLayout from '@/components/AppLayout'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -31,12 +31,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${outfit.variable} ${spaceGrotesk.variable} font-sans`}>
+      <body className={`${inter.variable} ${outfit.variable} ${spaceGrotesk.variable} font-sans bg-gray-50 dark:bg-slate-900`}>
         <Providers>
-          <Nav />
-          <main className="pt-16">
+          <AppLayout>
             {children}
-          </main>
+          </AppLayout>
         </Providers>
       </body>
     </html>
