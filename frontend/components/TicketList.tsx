@@ -5,7 +5,7 @@ import { Ticket, getTickets, deleteTicket } from '@/lib/api';
 import Loader from './Loader';
 import Link from 'next/link';
 // ThemeToggle intentionally omitted here; global toggle is in NavBar
-import { PlusIcon, EyeIcon, TrashIcon, MailIcon, UserIcon, PhoneIcon, ClockIcon, SearchIcon, AnalyzeIcon } from '@/components/icons/Icons';
+import { EyeIcon, TrashIcon, MailIcon, UserIcon, PhoneIcon, ClockIcon, SearchIcon, AnalyzeIcon, PlusIcon } from '@/components/icons/Icons';
 import { languageNames } from '@/lib/languages';
 
 export default function TicketList() {
@@ -104,24 +104,9 @@ export default function TicketList() {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-3">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-            </svg>
-            <span className="font-mono">INBOX</span>
-          </div>
-          <h1 className="text-4xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300">
+          <h1 className="text-6xl sm:text-7xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-300 dark:via-blue-300 dark:to-cyan-300 leading-tight tracking-tight">
             Tickets
           </h1>
-        </div>
-        <div className="flex gap-3 items-center">
-          <Link
-            href="/"
-            className="px-6 py-2.5 ai-gradient text-white rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg shadow-blue-500/25 dark:shadow-blue-800/20 flex items-center gap-2"
-          >
-            <PlusIcon className="w-4 h-4" />
-            New Ticket
-          </Link>
         </div>
       </div>
 

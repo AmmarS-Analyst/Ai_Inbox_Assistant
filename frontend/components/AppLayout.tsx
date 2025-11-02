@@ -5,14 +5,17 @@ import { ToastProvider } from '@/components/Toast';
 import NavBar from '@/components/NavBar';
 import { motion } from 'framer-motion';
 import { fadeIn } from '@/lib/animations';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export default function AppLayout({ children }: LayoutProps) {
+  const { lang } = useLanguage();
+  
   return (
-    <>
+    <div dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       <ToastProvider>
         <NavBar />
         <motion.main
@@ -22,6 +25,6 @@ export default function AppLayout({ children }: LayoutProps) {
           {children}
         </motion.main>
       </ToastProvider>
-    </>
+    </div>
   );
 }

@@ -94,17 +94,12 @@ export default function Home() {
   };
 
   return (
-    <div dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 transition-all duration-200">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 transition-all duration-200">
         <div className="absolute inset-0 bg-grid-slate-900/[0.04] dark:bg-grid-slate-100/[0.03] -z-10"></div>
         <div className="container mx-auto px-4 py-12 max-w-6xl relative">
           {/* Header */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
             <div className="text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4 hover:scale-105 transition-transform duration-300 cursor-default">
-                <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400 pulse"></div>
-                <span className="font-mono tracking-wide">Smart Assistant</span>
-              </div>
               <h1 className="text-6xl sm:text-7xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-300 dark:via-blue-300 dark:to-cyan-300 mb-4 leading-tight tracking-tight">
                 {t.title}
               </h1>
@@ -246,7 +241,6 @@ export default function Home() {
           ) : null}
         </div>
       </div>
-    </div>
   );
 }
 

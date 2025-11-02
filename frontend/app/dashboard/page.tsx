@@ -114,8 +114,8 @@ export default function DashboardPage() {
             </ol>
           </div>
 
-            <div className="p-6 card bg-white/60 dark:bg-slate-800/60 rounded-xl">
-              <h3 className="text-lg font-semibold mb-3">Daily tickets — trend & 7-day average</h3>
+            <div className="p-6 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-200">
+              <h3 className="text-xl font-display font-semibold mb-3 text-gray-900 dark:text-white">Daily tickets — trend & 7-day average</h3>
               {metrics.trend.length === 0 ? (
                 <div className="text-sm text-gray-700 dark:text-gray-300">No activity in the last 30 days.</div>
               ) : (

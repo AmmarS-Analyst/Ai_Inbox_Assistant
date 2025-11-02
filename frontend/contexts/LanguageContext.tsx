@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useLayoutEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 type Lang = 'en' | 'ar';
 
@@ -13,26 +13,36 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const getInitial = (): Lang => {
-    try {
-      const saved = typeof window !== 'undefined' ? (localStorage.getItem('lang') as Lang | null) : null;
-      if (saved === 'en' || saved === 'ar') return saved;
-      const nav = typeof navigator !== 'undefined' ? navigator.language : 'en';
-      return nav.startsWith('ar') ? 'ar' : 'en';
-    } catch (e) {
-      return 'en';
-    }
-  };
+  // Start with default 'en' to avoid hydration mismatch
+  const [lang, setLang] = useState<Lang>('en');
+  const [mounted, setMounted] = useState(false);
 
-  const [lang, setLang] = useState<Lang>(getInitial);
-
-  useLayoutEffect(() => {
+  // Hydrate from localStorage or navigator after mount
+  useEffect(() => {
+    setMounted(true);
     try {
-      localStorage.setItem('lang', lang);
+      const saved = localStorage.getItem('lang') as Lang | null;
+      if (saved === 'en' || saved === 'ar') {
+        setLang(saved);
+      } else {
+        const nav = navigator.language;
+        const detected = nav.startsWith('ar') ? 'ar' : 'en';
+        setLang(detected);
+      }
     } catch (e) {
       // ignore
     }
-  }, [lang]);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      try {
+        localStorage.setItem('lang', lang);
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [lang, mounted]);
 
   const toggleLanguage = () => setLang((l) => (l === 'en' ? 'ar' : 'en'));
   const setLanguage = (l: Lang) => setLang(l);
