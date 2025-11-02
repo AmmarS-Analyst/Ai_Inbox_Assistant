@@ -64,12 +64,13 @@ export default function DashboardPage() {
   const prioData = [prioLow, prioMedium, prioHigh];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 p-8">
-      <div className="container mx-auto max-w-6xl">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 transition-colors duration-200">
+      <div className="absolute inset-0 bg-grid-slate-900/[0.04] dark:bg-grid-slate-100/[0.03] -z-10"></div>
+      <div className="container mx-auto px-4 py-12 max-w-6xl relative">
+        <h1 className="text-5xl sm:text-6xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-300 dark:via-blue-300 dark:to-cyan-300 mb-8 leading-tight tracking-tight">Dashboard</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 card bg-white/60 dark:bg-slate-800/60 rounded-xl">
-            <h2 className="text-lg font-semibold mb-4">Open vs Closed</h2>
+          <div className="p-6 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <h2 className="text-xl font-display font-semibold mb-4 text-gray-900 dark:text-white">Open vs Closed</h2>
             <div className="flex items-center gap-6">
               <div>
                 <SimpleDonut labels={["Open", "Closed"]} values={donutData} colors={["#2563eb", "#6b7280"]} size={160} />
@@ -84,8 +85,8 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="p-6 card bg-white/60 dark:bg-slate-800/60 rounded-xl">
-            <h2 className="text-lg font-semibold mb-4">Priority distribution</h2>
+          <div className="p-6 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <h2 className="text-xl font-display font-semibold mb-4 text-gray-900 dark:text-white">Priority distribution</h2>
             <div className="flex items-center gap-6">
               <div style={{ width: 240 }}>
                 <SimpleBar labels={["Low","Medium","High"]} values={prioData} colors={["#10b981", "#f59e0b", "#ef4444"]} max={Math.max(...prioData, 1)} />
@@ -103,8 +104,8 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 card bg-white/60 dark:bg-slate-800/60 rounded-xl">
-            <h3 className="text-lg font-semibold mb-3">Top intents</h3>
+          <div className="p-6 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50 rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-200">
+            <h3 className="text-xl font-display font-semibold mb-3 text-gray-900 dark:text-white">Top intents</h3>
             <ol className="list-decimal pl-5 space-y-2 text-sm text-gray-700 dark:text-gray-300">
               {metrics.topIntents.length === 0 && <li>No intents found</li>}
               {metrics.topIntents.map((t) => (
