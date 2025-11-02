@@ -52,7 +52,7 @@ DB_HOST=localhost
 DB_PORT=5432
 AI_BASE_URL=https://api.groq.com/openai/v1
 AI_API_KEY="I have used groq API key"
-AI_MODEL=llama-3.1-8b-instruct
+AI_MODEL=lopenai/gpt-oss-20b
 FRONTEND_URL=http://localhost:3000
 ```
 

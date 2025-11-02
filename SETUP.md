@@ -36,7 +36,7 @@ DB_HOST=localhost
 DB_PORT=5432
 AI_BASE_URL=https://api.groq.com/openai/v1
 AI_API_KEY=Your API KEY
-AI_MODEL= Ai Model 
+AI_MODEL= openai/gpt-oss-20b
 FRONTEND_URL=http://localhost:3000
 ```
 
