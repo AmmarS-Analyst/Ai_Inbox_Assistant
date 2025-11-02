@@ -1,6 +1,22 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Providers } from '@/components/Providers'
+import { Inter, Outfit, Space_Grotesk } from 'next/font/google'
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter'
+})
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit'
+})
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk'
+})
 
 export const metadata: Metadata = {
   title: 'AI Inbox Assistant',
@@ -14,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className={`${inter.variable} ${outfit.variable} ${spaceGrotesk.variable} font-sans`}>
         <Providers>
           {children}
         </Providers>

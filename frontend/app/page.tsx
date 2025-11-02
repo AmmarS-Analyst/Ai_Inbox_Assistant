@@ -94,25 +94,57 @@ export default function Home() {
 
   return (
     <div dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-200">
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 transition-all duration-200">
+        <div className="absolute inset-0 bg-grid-slate-900/[0.04] dark:bg-grid-slate-100/[0.03] -z-10"></div>
+        <div className="container mx-auto px-4 py-12 max-w-6xl relative">
           {/* Header */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">{t.title}</h1>
-              <p className="text-gray-600 dark:text-gray-300">{t.subtitle}</p>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
+            <div className="text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium mb-4 hover:scale-105 transition-transform duration-300 cursor-default">
+                <div className="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400 pulse"></div>
+                <span className="font-mono tracking-wide">AI POWERED</span>
+              </div>
+              <h1 className="text-6xl sm:text-7xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-300 dark:via-blue-300 dark:to-cyan-300 mb-4 leading-tight tracking-tight">
+                {t.title}
+              </h1>
+              <div className="relative">
+                <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl font-display leading-relaxed">
+                  {t.subtitle}
+                  <span className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 rounded-full"></span>
+                </p>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-gray-50 dark:bg-slate-800/50 backdrop-blur-sm">
+                  <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Instant Analysis</span>
+                </div>
+                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-gray-50 dark:bg-slate-800/50 backdrop-blur-sm">
+                  <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                  </svg>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">Smart Organization</span>
+                </div>
+                <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-gray-50 dark:bg-slate-800/50 backdrop-blur-sm">
+                  <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/>
+                  </svg>
+                  <span className="text-sm text-gray-600 dark:text-gray-300">AI Magic</span>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-wrap gap-3 items-center justify-center md:justify-end">
               <ThemeToggle />
               <button
                 onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-                className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-200 transition-colors"
+                className="px-4 py-2 glass-effect rounded-lg hover:bg-gray-100/10 text-gray-700 dark:text-gray-200 transition-all duration-200"
               >
                 {t.toggleLanguage}
               </button>
               <button
                 onClick={() => router.push('/tickets')}
-                className="px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm"
+                className="px-6 py-2.5 ai-gradient text-white rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg shadow-blue-500/25 dark:shadow-blue-800/20"
               >
                 {t.goToTickets}
               </button>
@@ -121,54 +153,113 @@ export default function Home() {
 
           {!showForm ? (
             /* Message Input */
-            <div className="card p-8">
-              <div className="space-y-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {t.pasteMessage}
-                </label>
-                <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  rows={12}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-colors"
-                  placeholder={
-                    language === 'en'
-                      ? 'Paste your message here...\n\nExample:\nHi, my name is John Smith and I\'m emailing from john@example.com. I have a billing question about my invoice dated November 15th. The amount was $299. Can you help me urgently? Thanks!'
-                      : 'الصق رسالتك هنا...\n\nمثال:\nمرحبا، اسمي أحمد محمد. عندي مشكلة في الفاتورة المؤرخة في 15 نوفمبر. المبلغ 1500 ريال. أحتاج مساعدة عاجلة. بريد: ahmed@example.com'
-                  }
-                  dir={language === 'ar' ? 'rtl' : 'ltr'}
-                />
-                {error && (
-                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-                    {error}
+            <div className="grid md:grid-cols-5 gap-8">
+              <div className="md:col-span-3">
+                <div className="card p-8 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-10 h-10 rounded-full ai-gradient flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z"/>
+                        </svg>
+                      </div>
+                      <label className="block text-lg font-medium text-gray-700 dark:text-gray-200">
+                        {t.pasteMessage}
+                      </label>
+                    </div>
+                    <textarea
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      rows={12}
+                      className="w-full px-6 py-4 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200 shadow-sm"
+                      placeholder={
+                        language === 'en'
+                          ? 'Paste your message here...\n\nExample:\nHi, my name is John Smith and I\'m emailing from john@example.com. I have a billing question about my invoice dated November 15th. The amount was $299. Can you help me urgently? Thanks!'
+                          : 'الصق رسالتك هنا...\n\nمثال:\nمرحبا، اسمي أحمد محمد. عندي مشكلة في الفاتورة المؤرخة في 15 نوفمبر. المبلغ 1500 ريال. أحتاج مساعدة عاجلة. بريد: ahmed@example.com'
+                      }
+                      dir={language === 'ar' ? 'rtl' : 'ltr'}
+                    />
+                    {error && (
+                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-400 px-6 py-4 rounded-xl">
+                        <div className="flex items-center gap-2">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9 7a1 1 0 112 0v4a1 1 0 11-2 0V7zm1 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/>
+                          </svg>
+                          {error}
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={handleAnalyze}
+                      disabled={loading || !message.trim()}
+                      className="w-full px-6 py-4 ai-gradient text-white rounded-xl hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-semibold shadow-lg shadow-blue-500/25 dark:shadow-blue-800/20 transition-all duration-200 group"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center">
+                          <Loader />
+                          <span className="ml-2">{t.analyzing}</span>
+                        </span>
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="w-5 h-5 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                          </svg>
+                          {t.analyze}
+                        </span>
+                      )}
+                    </button>
                   </div>
-                )}
-                <button
-                  onClick={handleAnalyze}
-                  disabled={loading || !message.trim()}
-                  className="w-full px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center">
-                      <Loader />
-                      <span className="ml-2">{t.analyzing}</span>
-                    </span>
-                  ) : (
-                    t.analyze
-                  )}
-                </button>
+                </div>
+              </div>
+              <div className="md:col-span-2">
+                <div className="card p-8 backdrop-blur-xl bg-white/30 dark:bg-slate-900/30">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 flex items-center justify-center">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">How it works</h3>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-1">1</div>
+                        <p className="text-gray-600 dark:text-gray-300">Paste any message from email, chat, or social media</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-1">2</div>
+                        <p className="text-gray-600 dark:text-gray-300">Our AI will analyze and extract key information</p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0 mt-1">3</div>
+                        <p className="text-gray-600 dark:text-gray-300">Review and save as a structured ticket</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           ) : extractedTicket ? (
             /* Ticket Form */
             <div className="space-y-6">
-              <div className="card p-8">
+              <div className="card p-8 backdrop-blur-xl bg-white/50 dark:bg-slate-900/50">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t.editBeforeSave}</h2>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full ai-gradient flex items-center justify-center">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t.editBeforeSave}</h2>
+                  </div>
                   <button
                     onClick={handleNewAnalysis}
-                    className="px-4 py-2 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition-colors"
+                    className="px-4 py-2 glass-effect rounded-lg hover:bg-gray-100/10 text-gray-700 dark:text-gray-200 transition-all duration-200 flex items-center gap-2"
                   >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
                     {language === 'en' ? 'New Analysis' : 'تحليل جديد'}
                   </button>
                 </div>
