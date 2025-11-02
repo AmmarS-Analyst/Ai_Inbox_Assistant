@@ -56,7 +56,7 @@ export default function Home() {
       const response = await extractTicket(message);
       const ticket = response.data;
       
-      // Transform contact object to flat structure for form
+  
       const flatTicket: Ticket = {
         ...ticket,
         contact_name: ticket.contact_name || (ticket as any).contact?.name || null,
@@ -64,7 +64,7 @@ export default function Home() {
         contact_phone: ticket.contact_phone || (ticket as any).contact?.phone || null,
       };
 
-      // Detect language from extracted ticket and set global UI language
+      
       if (ticket.language === 'ar') {
         setLanguage('ar');
       }
@@ -125,7 +125,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex flex-wrap gap-3 items-center justify-center md:justify-end">
-              {/* Language toggle removed from main page - use NavBar control instead */}
+              {/* Language toggle removed from main page  use NavBar control instead */}
             </div>
           </div>
 

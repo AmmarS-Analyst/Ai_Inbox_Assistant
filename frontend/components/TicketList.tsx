@@ -4,11 +4,43 @@ import { useState, useEffect } from 'react';
 import { Ticket, getTickets, deleteTicket } from '@/lib/api';
 import Loader from './Loader';
 import Link from 'next/link';
-// ThemeToggle intentionally omitted here; global toggle is in NavBar
 import { EyeIcon, TrashIcon, MailIcon, UserIcon, PhoneIcon, ClockIcon, SearchIcon, AnalyzeIcon, PlusIcon } from '@/components/icons/Icons';
 import { languageNames } from '@/lib/languages';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function TicketList() {
+  const { lang } = useLanguage();
+  const direction = lang === 'ar' ? 'rtl' : 'ltr';
+
+  const translations = {
+    en: {
+      tickets: 'Tickets',
+      search: 'Search',
+      status: 'Status',
+      priority: 'Priority',
+      language: 'Language',
+      apply: 'Apply Filters',
+      clear: 'Clear',
+      deleteConfirm: 'Are you sure you want to delete this ticket?',
+      noTickets: 'No tickets found. Create your first ticket by analyzing a message.',
+      created: 'Created',
+    },
+    ar: {
+      tickets: 'تذاكر',
+      search: 'بحث',
+      status: 'الحالة',
+      priority: 'الأولوية',
+      language: 'اللغة',
+      apply: 'تطبيق الفلاتر',
+      clear: 'مسح',
+      deleteConfirm: 'هل أنت متأكد أنك تريد حذف هذه التذكرة؟',
+      noTickets: 'لم يتم العثور على تذاكر. أنشئ أول تذكرة عن طريق تحليل رسالة.',
+      created: 'تم الإنشاء',
+    },
+  };
+
+  const t = (key: keyof typeof translations['en']) => translations[lang][key] || key;
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,18 +75,14 @@ export default function TicketList() {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleApplyFilters = () => {
-    fetchTickets();
-  };
-
+  const handleApplyFilters = () => fetchTickets();
   const handleClearFilters = () => {
     setFilters({ status: '', priority: '', language: '', search: '' });
     setTimeout(() => fetchTickets(), 100);
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this ticket?')) return;
-
+    if (!confirm(t('deleteConfirm'))) return;
     try {
       await deleteTicket(id);
       fetchTickets();
@@ -82,98 +110,96 @@ export default function TicketList() {
       : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300';
   };
 
-  if (loading && tickets.length === 0) {
-    return <Loader />;
-  }
+  if (loading && tickets.length === 0) return <Loader />;
 
-  // Get unique languages from tickets (TS-safe: avoid Set iteration spread which can
-  // cause errors when target/lib is older than ES2015)
   const availableLanguages = tickets
     .map((ticket) => ticket.language)
     .filter(Boolean) as string[];
 
-  // Dedupe while preserving order
   const uniqueLanguages = availableLanguages.reduce<string[]>((acc, lang) => {
     if (!acc.includes(lang)) acc.push(lang);
     return acc;
   }, []);
-  
-  // languageNames imported from frontend/lib/languages.ts
 
   return (
-    <div className="space-y-8">
+    <div dir={direction} className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-6xl sm:text-7xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-300 dark:via-blue-300 dark:to-cyan-300 leading-tight tracking-tight">
-            Tickets
-          </h1>
-        </div>
+        <h1 className="text-6xl sm:text-7xl font-display font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 dark:from-indigo-300 dark:via-blue-300 dark:to-cyan-300 leading-tight tracking-tight">
+          {t('tickets')}
+        </h1>
       </div>
 
-  {/* Filters */}
-  <div className="p-6 card backdrop-blur-xl bg-white/50 dark:bg-slate-900/50">
+      {/* Filters */}
+      <div className="p-6 card backdrop-blur-xl bg-white/50 dark:bg-slate-900/50">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          {/* Search */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               <SearchIcon className="w-4 h-4 text-gray-500" />
-              Search
+              {t('search')}
             </label>
             <input
               type="text"
               value={filters.search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              placeholder="Search messages, intent..."
+              placeholder={t('search') + '...'}
               className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all duration-200"
             />
           </div>
+
+          {/* Status */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
-              Status
+              {t('status')}
             </label>
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-all duration-200"
             >
-              <option value="">All Statuses</option>
+              <option value="">{t('status')}</option>
               <option value="open">Open</option>
               <option value="closed">Closed</option>
             </select>
           </div>
+
+          {/* Priority */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
               </svg>
-              Priority
+              {t('priority')}
             </label>
             <select
               value={filters.priority}
               onChange={(e) => handleFilterChange('priority', e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-all duration-200"
             >
-              <option value="">All Priorities</option>
+              <option value="">{t('priority')}</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
           </div>
+
+          {/* Language */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
               <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
               </svg>
-              Language
+              {t('language')}
             </label>
             <select
               value={filters.language}
               onChange={(e) => handleFilterChange('language', e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 transition-all duration-200"
             >
-              <option value="">All Languages</option>
+              <option value="">{t('language')}</option>
               {uniqueLanguages.map((lang) => (
                 <option key={lang} value={lang}>
                   {languageNames[lang] || lang}
@@ -182,20 +208,21 @@ export default function TicketList() {
             </select>
           </div>
         </div>
+
         <div className="flex gap-3">
           <button
             onClick={handleApplyFilters}
-            className="px-6 py-2.5 ai-gradient text-white rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg shadow-blue-500/25 dark:shadow-blue-800/20 flex items-center gap-2"
+            className="px-6 py-2 ai-gradient text-white rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg shadow-blue-500/25 dark:shadow-blue-800/20 flex items-center gap-2"
           >
             <PlusIcon className="w-4 h-4" />
-            Apply Filters
+            {t('apply')}
           </button>
           <button
             onClick={handleClearFilters}
-            className="px-6 py-2.5 glass-effect rounded-lg hover:bg-gray-100/10 text-gray-700 dark:text-gray-200 transition-all duration-200 flex items-center gap-2"
+            className="px-6 py-2 glass-effect rounded-lg hover:bg-gray-100/10 text-gray-700 dark:text-gray-200 transition-all duration-200 flex items-center gap-2"
           >
             <TrashIcon className="w-4 h-4" />
-            Clear
+            {t('clear')}
           </button>
         </div>
       </div>
@@ -206,11 +233,8 @@ export default function TicketList() {
         </div>
       )}
 
-      {/* Tickets List */}
-        {tickets.length === 0 ? (
-        <div className="text-center py-12 muted">
-          No tickets found. Create your first ticket by analyzing a message.
-        </div>
+      {tickets.length === 0 ? (
+        <div className="text-center py-12 muted">{t('noTickets')}</div>
       ) : (
         <div className="grid gap-6">
           {tickets.map((ticket) => (
@@ -221,24 +245,16 @@ export default function TicketList() {
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(
-                        ticket.status
-                      )}`}
-                    >
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusColor(ticket.status)}`}>
                       <span className="w-2 h-2 rounded-full bg-current"></span>
                       {ticket.status}
                     </span>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getPriorityColor(
-                        ticket.priority
-                      )}`}
-                    >
-                        <AnalyzeIcon className="w-4 h-4" />
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${getPriorityColor(ticket.priority)}`}>
+                      <AnalyzeIcon className="w-4 h-4" />
                       {ticket.priority}
                     </span>
                     <span className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                        <MailIcon className="w-4 h-4" />
+                      <MailIcon className="w-4 h-4" />
                       {ticket.channel}
                       <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,10 +313,7 @@ export default function TicketList() {
               {ticket.entities && ticket.entities.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-3">
                   {ticket.entities.map((entity, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-full text-xs flex items-center gap-2"
-                    >
+                    <span key={idx} className="px-3 py-1 bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 rounded-full text-xs flex items-center gap-2">
                       <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                       </svg>
@@ -312,7 +325,7 @@ export default function TicketList() {
               {ticket.created_at && (
                 <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2">
                   <ClockIcon className="w-4 h-4" />
-                  Created: {new Date(ticket.created_at).toLocaleString()}
+                  {t('created')}: {new Date(ticket.created_at).toLocaleString()}
                 </p>
               )}
             </div>

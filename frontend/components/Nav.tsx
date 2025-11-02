@@ -1,8 +1,9 @@
+// for legacy support
 'use client';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-// ThemeToggle removed from this legacy Nav; use NavBar ThemeToggle
+
 
 export default function Nav() {
   const pathname = usePathname();
@@ -36,7 +37,7 @@ export default function Nav() {
               </Link>
             </div>
           </div>
-          {/* ThemeToggle removed from legacy Nav - use main NavBar */}
+                  
         </div>
       </div>
     </nav>

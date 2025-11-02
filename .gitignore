@@ -34,4 +34,5 @@ build/
 # Testing
 coverage/
 .nyc_output/
-
+.QUICK_START.md
+.DOCUMENTATION.md

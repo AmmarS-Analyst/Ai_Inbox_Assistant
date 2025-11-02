@@ -12,7 +12,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Initialize synchronously from localStorage or system preference to avoid theme flash
+
   const getInitialTheme = (): Theme => {
     try {
       const saved = typeof window !== 'undefined' ? localStorage.getItem('theme') as Theme | null : null;
@@ -26,7 +26,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
-  // Apply theme synchronously before paint to reduce flicker
+
   useLayoutEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {

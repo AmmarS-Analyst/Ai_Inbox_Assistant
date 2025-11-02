@@ -60,8 +60,8 @@ DB_PASSWORD=admin
 DB_HOST=localhost
 DB_PORT=5432
 AI_BASE_URL=https://api.groq.com/openai/v1
-AI_API_KEY=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
-AI_MODEL=llama-3.1-8b-instruct
+AI_API_KEY= Your API KEY
+AI_MODEL= AI model
 FRONTEND_URL=http://localhost:3000
 ```
 
@@ -224,31 +224,7 @@ Hi, my name is John Smith and I'm emailing from john@example.com. I have a billi
 مرحبا، اسمي أحمد محمد. عندي مشكلة في الفاتورة المؤرخة في 15 نوفمبر. المبلغ 1500 ريال. أحتاج مساعدة عاجلة. بريد: ahmed@example.com
 ```
 
-## Deployment
 
-### Backend
-1. Deploy to Render, Railway, or Heroku
-2. Set environment variables in the platform
-3. Configure PostgreSQL (Supabase, Neon, or hosted PostgreSQL)
 
-### Frontend
-1. Deploy to Vercel, Netlify, or similar
-2. Set `NEXT_PUBLIC_API_URL` to your backend URL
-3. Configure CORS on backend to allow frontend domain
 
-## Notes
-
-- The AI extraction uses temperature 0.2 for deterministic results
-- JSON response format is enforced for consistent parsing
-- All AI outputs are validated against the schema before saving
-- Contact details are never hallucinated - null if not present
-- Reply suggestions are generated in the detected language (2-5 sentences)
-
-## License
-
-ISC
-
-## Support
-
-For issues or questions, please check the code comments or open an issue.
 

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-## 🚀 Get Up and Running in 5 Minutes
+
 
 ### 1. Start PostgreSQL
 Make sure PostgreSQL is running and create the database:
@@ -51,7 +51,7 @@ DB_PASSWORD=admin
 DB_HOST=localhost
 DB_PORT=5432
 AI_BASE_URL=https://api.groq.com/openai/v1
-AI_API_KEY=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
+AI_API_KEY="I have used groq API key"
 AI_MODEL=llama-3.1-8b-instruct
 FRONTEND_URL=http://localhost:3000
 ```
@@ -67,5 +67,5 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 - Frontend: http://localhost:3000 should show the paste interface
 - Database: Check PostgreSQL - `tickets` table should be created automatically
 
-That's it! You're ready to go! 🎉
+
 

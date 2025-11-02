@@ -35,8 +35,8 @@ DB_PASSWORD=admin
 DB_HOST=localhost
 DB_PORT=5432
 AI_BASE_URL=https://api.groq.com/openai/v1
-AI_API_KEY=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
-AI_MODEL=llama-3.1-8b-instruct
+AI_API_KEY=Your API KEY
+AI_MODEL= Ai Model 
 FRONTEND_URL=http://localhost:3000
 ```
 
