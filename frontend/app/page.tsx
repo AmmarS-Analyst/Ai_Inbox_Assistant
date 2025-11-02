@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { extractTicket, createTicket, Ticket } from '@/lib/api';
 import TicketForm from '@/components/TicketForm';
 import Loader from '@/components/Loader';
-import ThemeToggle from '@/components/ThemeToggle';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { MailIcon, AnalyzeIcon, SparkIcon, OrganizeIcon, InsightsIcon, CheckIcon } from '@/components/icons/Icons';
 
 export default function Home() {
@@ -15,7 +15,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [extractedTicket, setExtractedTicket] = useState<Ticket | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+  const { lang: language, setLanguage } = useLanguage();
 
   const translations = {
     en: {
@@ -64,7 +64,7 @@ export default function Home() {
         contact_phone: ticket.contact_phone || (ticket as any).contact?.phone || null,
       };
 
-      // Detect language from extracted ticket
+      // Detect language from extracted ticket and set global UI language
       if (ticket.language === 'ar') {
         setLanguage('ar');
       }

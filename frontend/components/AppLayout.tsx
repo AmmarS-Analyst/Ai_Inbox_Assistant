@@ -17,7 +17,7 @@ export default function AppLayout({ children }: LayoutProps) {
         <NavBar />
         <motion.main
           {...fadeIn}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20"
+          className="min-h-[calc(100vh-4rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full"
         >
           {children}
         </motion.main>

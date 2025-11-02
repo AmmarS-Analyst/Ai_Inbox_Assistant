@@ -1,6 +1,20 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 type Metrics = {
   total: number;
@@ -99,18 +113,32 @@ export default function DashboardPage() {
             </ol>
           </div>
 
-          <div className="p-6 card bg-white/60 dark:bg-slate-800/60 rounded-xl">
-            <h3 className="text-lg font-semibold mb-3">Last 30 days (tickets/day)</h3>
-            <div className="text-sm text-gray-700 dark:text-gray-300">
+            <div className="p-6 card bg-white/60 dark:bg-slate-800/60 rounded-xl">
+              <h3 className="text-lg font-semibold mb-3">Daily tickets — trend & 7-day average</h3>
               {metrics.trend.length === 0 ? (
-                <div>No activity in the last 30 days.</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300">No activity in the last 30 days.</div>
               ) : (
-                <div className="overflow-auto">
-                  <TrendSpark data={metrics.trend} />
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-4 mb-2">
+                    <div className="flex-1 min-w-[160px]">
+                      <div className="text-xs text-gray-500">Avg / day</div>
+                      <div className="text-2xl font-semibold">{Math.round(metrics.trend.reduce((a,b)=>a+b.count,0)/Math.max(metrics.trend.length,1))}</div>
+                    </div>
+                    <div className="flex-1 min-w-[160px]">
+                      <div className="text-xs text-gray-500">7-day avg</div>
+                      <div className="text-2xl font-semibold">{compute7DayAvg(metrics.trend)}</div>
+                    </div>
+                    <div className="flex-1 min-w-[160px]">
+                      <div className="text-xs text-gray-500">Change vs prev 7d</div>
+                      <div className="text-2xl font-semibold">{computePercentChange(metrics.trend)}</div>
+                    </div>
+                  </div>
+                  <div className="w-full overflow-hidden">
+                    <TrendChart data={metrics.trend} height={160} />
+                  </div>
                 </div>
               )}
             </div>
-          </div>
         </div>
       </div>
     </div>
@@ -187,20 +215,131 @@ function SimpleBar({ labels, values, colors, max = 1 }: { labels: string[]; valu
   );
 }
 
-function TrendSpark({ data }: { data: { day: string; count: number }[] }) {
-  // Small sparkline using polyline
-  const width = Math.max(300, data.length * 10);
-  const height = 60;
+// TrendChart using Chart.js
+function TrendChart({ data, height = 140 }: { data: { day: string; count: number }[]; height?: number }) {
+  const labels = data.map(d => d.day);
+  const counts = data.map(d => d.count);
+
+  // compute 7-day moving average
+  const ma = counts.map((_, i) => {
+    const slice = counts.slice(Math.max(0, i - 6), i + 1);
+    const avg = slice.reduce((s, v) => s + v, 0) / slice.length;
+    return Math.round(avg * 100) / 100;
+  });
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: 'Tickets',
+        data: counts,
+        borderColor: '#2563eb',
+        backgroundColor: 'rgba(37,99,235,0.12)',
+        tension: 0.25,
+        fill: true,
+        pointRadius: 2,
+      },
+      {
+        label: '7-day avg',
+        data: ma,
+        borderColor: '#10b981',
+        borderDash: [6, 4],
+        tension: 0.2,
+        pointRadius: 0,
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top' as const },
+      tooltip: { mode: 'index' as const, intersect: false },
+      title: { display: false },
+    },
+    scales: {
+      x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
+      y: { beginAtZero: true, ticks: { precision: 0 } },
+    },
+  };
+
+  return (
+    <div style={{ height }}>
+      <Line data={chartData} options={options} />
+    </div>
+  );
+}
+
+function compute7DayAvg(data: { day: string; count: number }[]) {
+  const last7 = data.slice(-7);
+  if (last7.length === 0) return 0;
+  const avg = Math.round(last7.reduce((s, d) => s + d.count, 0) / last7.length);
+  return avg;
+}
+
+function computePercentChange(data: { day: string; count: number }[]) {
+  const len = data.length;
+  if (len < 14) return '–';
+  const recent = data.slice(-7).reduce((s,d)=>s+d.count,0) / 7;
+  const prev = data.slice(-14, -7).reduce((s,d)=>s+d.count,0) / 7;
+  if (prev === 0) return recent === 0 ? '0%' : '↑ 100%';
+  const pct = Math.round(((recent - prev) / prev) * 100);
+  return `${pct > 0 ? '↑' : pct < 0 ? '↓' : ''} ${Math.abs(pct)}%`;
+}
+
+function TrendLine({ data, height = 140 }: { data: { day: string; count: number }[]; height?: number }) {
+  // Responsive width via viewBox; we'll use 600 units width
+  const width = Math.max(300, data.length * 18);
   const max = Math.max(...data.map(d => d.count), 1);
+  // compute 7-day moving average
+  const ma: number[] = data.map((_, i) => {
+    const slice = data.slice(Math.max(0, i - 6), i + 1);
+    const avg = slice.reduce((s, d) => s + d.count, 0) / slice.length;
+    return avg;
+  });
+
   const points = data.map((d, i) => {
     const x = (i / Math.max(1, data.length - 1)) * width;
-    const y = height - (d.count / max) * height;
+    const y = height - (d.count / max) * (height - 8) - 4;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const maPoints = ma.map((v, i) => {
+    const x = (i / Math.max(1, data.length - 1)) * width;
+    const y = height - (v / max) * (height - 8) - 4;
     return `${x},${y}`;
   }).join(' ');
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+    <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="rounded-lg">
+      <defs>
+        <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#2563eb" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#2563eb" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      {/* area under main line */}
+      <polyline points={`${points} ${width},${height} 0,${height}`} fill="url(#grad)" stroke="none" />
       <polyline points={points} fill="none" stroke="#2563eb" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      {/* moving average */}
+      <polyline points={maPoints} fill="none" stroke="#10b981" strokeWidth={2} strokeDasharray="6 4" strokeLinejoin="round" strokeLinecap="round" />
+      {/* dots */}
+      {data.map((d, i) => {
+        const x = (i / Math.max(1, data.length - 1)) * width;
+        const y = height - (d.count / max) * (height - 8) - 4;
+        return (
+          <circle key={d.day} cx={x} cy={y} r={2} fill="#2563eb" />
+        );
+      })}
+      {/* x labels (sparse) */}
+      {data.map((d, i) => {
+        if (i % Math.ceil(Math.max(1, data.length / 6)) !== 0) return null;
+        const x = (i / Math.max(1, data.length - 1)) * width;
+        return (
+          <text key={`l-${i}`} x={x} y={height - 2} fontSize={10} fill="#6b7280" textAnchor="middle">{d.day}</text>
+        );
+      })}
     </svg>
   );
 }

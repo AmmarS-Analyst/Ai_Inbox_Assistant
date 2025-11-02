@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { HomeIcon, TicketIcon, ChartIcon } from '@/components/icons/Icons';
 
@@ -54,16 +55,27 @@ export default function NavBar() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button
-              className="px-4 py-2 glass-effect rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100/10 transition-all duration-200"
-            >
-              العربية
-            </button>
-            {/* Removed duplicate CTA 'View All Tickets' - Tickets link exists in primary nav */}
+            {/* language toggle wired to global LanguageContext */}
+            <LangButton />
             <ThemeToggle />
           </div>
         </div>
       </div>
     </motion.nav>
+  );
+}
+
+function LangButton() {
+  const { lang, toggleLanguage } = useLanguage();
+  // when lang is 'en' show Arabic label to switch to Arabic; when 'ar' show English label
+  const label = lang === 'en' ? 'العربية' : 'English';
+  return (
+    <button
+      onClick={toggleLanguage}
+      className="px-4 py-2 glass-effect rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-100/10 transition-all duration-200"
+      aria-label="Toggle language"
+    >
+      {label}
+    </button>
   );
 }

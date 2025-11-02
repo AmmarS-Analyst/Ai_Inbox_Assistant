@@ -4,6 +4,142 @@ This document is a full developer-facing reference for the project. It explains 
 
 Table of contents
 - Overview & architecture
+# Inbox Assistant — Full Technical Documentation
+
+This document is a developer-facing reference for the project, covering architecture, file-by-file notes, runtime configuration, and UX decisions. It also highlights recent UX changes (nav, theme, language, charts) and how to work with them.
+
+Table of contents
+- Overview & architecture
+- How data flows (end-to-end)
+- Environment variables and runtime configuration
+- Backend: file-by-file and behavior
+- Frontend: file-by-file and component-level notes
+  - Theme handling (SSR icon + client swap)
+  - Language handling (global context)
+  - Charts & dashboard (Chart.js integration)
+  - UX & layout (global app container, responsive rules)
+- Database schema
+- API reference (examples)
+- Developer commands & troubleshooting
+
+---
+
+Overview & architecture
+------------------------
+The app is a classic web split:
+
+- Frontend: Next.js (App Router) + Tailwind. Presents the inbox assistant UI: paste messages, analyze, edit and save tickets, view lists and dashboard.
+- Backend: Express + PostgreSQL. Handles AI extraction proxying, ticket persistence, metrics endpoints.
+
+Design principles
+- Keep backend stateless and centralize AI provider credentials/config behind the server.
+- Keep the UI fast and responsive: global providers (theme, language) to avoid duplicated controls and reduce hydration mismatches.
+
+How data flows (end-to-end)
+--------------------------
+1. User pastes text on the home page and clicks Analyze.
+2. Frontend calls `POST /api/ai/extract` (see `frontend/lib/api.ts`).
+3. Backend calls configured AI provider and normalizes the response into a ticket-shaped object.
+4. Frontend flattens the response and shows `TicketForm` for edits.
+5. User saves: frontend POSTs to `POST /api/tickets` which persists via `TicketModel`.
+
+Environment variables & runtime config (backend)
+----------------------------------------------
+- FRONTEND_URL: allowed CORS origin (default http://localhost:3000)
+- DATABASE_URL or DB_USER/DB_PASS/DB_HOST/etc: Postgres connection
+- AI_BASE_URL: AI provider base URL
+- AI_MODEL: model to call
+- (Optional) GOOGLE_CLOUD_* if using translation features (removed/disabled in current branch)
+
+Backend notes
+-------------
+- `backend/src/server.js`: mounts routes and performs model warmup when applicable. Error middleware returns 500 with a short message.
+- `backend/src/models/TicketModel.js`: single source for SQL operations (parameterized queries). Uses JSONB for `entities`.
+
+Frontend notes — important components and conventions
+---------------------------------------------------
+- `frontend/components/NavBar.tsx`
+  - Single source for global navigation and top-right controls.
+  - Contains the theme toggle and language toggle (wired to global contexts) so duplicates are removed elsewhere.
+
+- Theme handling (SSR + client swap)
+  - `frontend/components/ThemeToggle.tsx` renders a static sun icon on the server to avoid hydration mismatch.
+  - The interactive toggle is dynamically imported client-side (`ThemeToggleClient`) and replaces the static icon. This gives a consistent SSR baseline and avoids flicker.
+  - Theme state is provided by `frontend/contexts/ThemeContext.tsx`. It initializes synchronously (reads localStorage or system preference) and uses `useLayoutEffect` to apply `document.documentElement.classList` to reduce a flash-of-incorrect-theme.
+
+- Language handling (global)
+  - New `frontend/contexts/LanguageContext.tsx` provides `lang`, `toggleLanguage()` and `setLanguage()`.
+  - `Providers` now wraps the app with both `ThemeProvider` and `LanguageProvider`.
+  - The NavBar language button toggles and persists language in localStorage; pages read `useLanguage()` to render copy and RTL direction.
+  - Home page (`app/page.tsx`) now reads the global language value (no local language state) and will switch UI copy and `dir` when language changes. AI-detected language (from extract result) will set the language to Arabic automatically if detected.
+
+- Charts & Dashboard
+  - The dashboard trend chart was upgraded to use `react-chartjs-2` + Chart.js for better accessibility, tooltips, and interaction (`frontend/app/dashboard/page.tsx`).
+  - The chart shows daily tickets and a 7-day moving average; KPI tiles display avg/day, 7-day avg and percent change vs previous 7 days.
+  - Chart.js is registered in the dashboard component using `ChartJS.register(...)`.
+
+- UX & layout
+  - `frontend/components/AppLayout.tsx` defines a standard centered app container (`max-w-7xl`) and uses `min-h-[calc(100vh-4rem)]` to keep consistent app aspect with the fixed navbar.
+  - Global utility classes (`globals.css`) provide `.card`, `.ai-gradient`, and `.glass-effect` to keep a consistent visual language.
+  - Duplicated theme toggles were removed in favor of a single control in `NavBar`.
+
+Files added/changed of interest
+-----------------------------
+- `frontend/contexts/LanguageContext.tsx` (new) — global language provider
+- `frontend/components/Providers.tsx` — now wraps with LanguageProvider
+- `frontend/components/NavBar.tsx` — language button wired to LanguageContext; duplicate CTAs removed
+- `frontend/app/page.tsx` — uses global language context; removed local language toggle
+- `frontend/app/dashboard/page.tsx` — replaced sparkline with Chart.js line chart + KPIs
+- `frontend/components/AppLayout.tsx` — standardized container and min-height
+
+Database schema (reminder)
+-------------------------
+Table: `tickets` (same columns as before, including `language` VARCHAR(10) and `entities` JSONB)
+
+API reference (high level)
+-------------------------
+- POST /api/ai/extract — extract structured ticket from raw message
+- POST /api/tickets — create ticket
+- GET /api/tickets — list (supports status, priority, language, search)
+- GET /api/tickets/:id — get ticket
+- PUT /api/tickets/:id — partial update
+- DELETE /api/tickets/:id — delete
+
+Developer quick commands
+------------------------
+From project root (Windows PowerShell):
+
+cd backend
+npm install
+npm run dev
+
+cd frontend
+npm install
+npm run dev
+
+Typecheck frontend:
+
+npx tsc --noEmit
+
+Notes / caveats
+---------------
+- The language toggle persists selection to localStorage; pages reactively read the language via React context.
+- The theme toggle uses a static SSR-friendly icon (sun) and replaces it client-side with the interactive toggle to avoid hydration mismatches.
+- The dashboard trend uses Chart.js for improved tooltips and accessibility; if you prefer more advanced interactions or brush/zoom features, consider using a full charting library (like Recharts, Vega or Highcharts) depending on licensing.
+
+UX summary
+----------
+- Single, consistent NavBar with primary navigation and global controls (theme + language).
+- Cleaner spacing and proportion via standardized app container (max width + reduced vertical padding).
+- Polished cards and glass-morphism look for foreground surfaces.
+- Interactive, accessible charts using Chart.js for better insights.
+
+# Inbox Assistant — Full Technical Documentation
+
+This document is a full developer-facing reference for the project. It explains the architecture, every important function and file, the database schema, API contracts, runtime behavior and where to change things. It is intentionally detailed so a developer can read this file and find any logic or code they need.
+
+Table of contents
+- Overview & architecture
 - How data flows (end-to-end)
 - Environment variables and runtime configuration
 - Backend (file-by-file, function-by-function)
@@ -309,12 +445,3 @@ Recent refactors and rationale
 - Replaced Set+spread with a reduce dedupe in `TicketList.tsx` to avoid TypeScript `TS2802` when compiling to older ES targets.
 - Humanized UI copy in `app/page.tsx` to remove heavy "AI" branding while preserving function and clarity.
 
-Final notes
------------
-This document aims to be the single source of truth for the codebase. If you want, I can also:
-
-- Generate a short Postman collection with the API endpoints and example bodies.
-- Add inline JSDoc comments to the backend model and controller functions for more discoverability in editors.
-- Add a CONTRIBUTING.md with testing and release steps.
-
-Tell me which of those you'd prefer next and I will implement it.

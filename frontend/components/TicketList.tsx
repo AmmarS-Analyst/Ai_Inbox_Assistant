@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Ticket, getTickets, deleteTicket } from '@/lib/api';
 import Loader from './Loader';
 import Link from 'next/link';
-import ThemeToggle from './ThemeToggle';
+// ThemeToggle intentionally omitted here; global toggle is in NavBar
 import { PlusIcon, EyeIcon, TrashIcon, MailIcon, UserIcon, PhoneIcon, ClockIcon, SearchIcon, AnalyzeIcon } from '@/components/icons/Icons';
 import { languageNames } from '@/lib/languages';
 
@@ -115,7 +115,6 @@ export default function TicketList() {
           </h1>
         </div>
         <div className="flex gap-3 items-center">
-          <ThemeToggle />
           <Link
             href="/"
             className="px-6 py-2.5 ai-gradient text-white rounded-lg hover:opacity-90 transition-all duration-200 shadow-lg shadow-blue-500/25 dark:shadow-blue-800/20 flex items-center gap-2"
