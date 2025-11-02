@@ -51,8 +51,8 @@ const startServer = async () => {
     await initializeDatabase();
     
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Health check available at: http://localhost:${PORT}/health`);
       // After server starts, attempt a non-blocking warmup of the local Ollama model
       (async () => {
         const usingLocalOllama = !!(process.env.AI_BASE_URL && process.env.AI_BASE_URL.includes('localhost:11434'));
@@ -75,7 +75,7 @@ const startServer = async () => {
             temperature: 0.0
           };
 
-          console.log(`Warmup: calling Ollama to preload model ${process.env.AI_MODEL} (timeout ${warmupTimeout}ms)`);
+            console.log(`Warmup: calling AI model ${process.env.AI_MODEL} (timeout ${warmupTimeout}ms)`);
           const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -85,11 +85,12 @@ const startServer = async () => {
 
           if (!res.ok) {
             const txt = await res.text();
-            console.warn(`Warmup: non-OK response ${res.status}: ${txt}`);
+            console.warn(`Warmup: non-OK response ${res.status}`);
+            console.debug(txt);
           } else {
             // consume body to finish request
             await res.text();
-            console.log('Warmup: completed (model should be loaded)');
+            console.log('Warmup: completed');
           }
         } catch (err) {
           if (err.name === 'AbortError') {
