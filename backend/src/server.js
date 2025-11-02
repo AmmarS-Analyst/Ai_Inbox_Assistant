@@ -5,6 +5,7 @@ require('dotenv').config();
 const { initializeDatabase } = require('./db');
 const aiRoutes = require('./routes/aiRoutes');
 const ticketRoutes = require('./routes/ticketRoutes');
+const metricsRoutes = require('./routes/metricsRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,6 +26,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/ai', aiRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/metrics', metricsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

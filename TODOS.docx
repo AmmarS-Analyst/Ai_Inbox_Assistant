@@ -1,0 +1,48 @@
+TODOS
+
+1) Inbox ingestion (pending messages)
+- Create DB table 'pending_messages' with fields:
+  - id, source, source_id, received_at, from_addr, to_addr, language, body, parsed (bool), parsed_ticket (jsonb), raw_payload (jsonb), status (pending|ignored|converted), created_ticket_id, processed_at
+- Implement backend routes:
+  - POST /api/inbox/webhook  -> receives provider payloads (Twilio/Gmail), verifies signature, dedupes on source+source_id, stores pending message
+  - GET /api/inbox           -> list pending messages (filters: source,status,search)
+  - POST /api/inbox/:id/analyze -> call AI extractor on body, store parsed_ticket and mark parsed=true
+  - POST /api/inbox/:id/convert -> create ticket from parsed_ticket or provided data, update pending_messages
+  - POST /api/inbox/:id/ignore -> mark as ignored
+- Implement webhook signature verification and idempotency
+- Provide background worker or immediate enqueue for heavy AI calls
+- Frontend /inbox:
+  - list messages, actions: Analyze, View, Create Ticket, Ignore, Bulk actions
+  - Use existing TicketForm to review parsed_ticket and save to tickets
+
+2) WhatsApp (Twilio) integration
+- Create Twilio webhook documentation, implement mapping of Twilio params to pending_messages
+- Validate X-Twilio-Signature on request
+- Test with ngrok / test phone
+
+3) Email ingestion options
+- IMAP polling (node-imap + mailparser) OR Gmail push via Pub/Sub
+- Implement account link UI (OAuth) if using Gmail API
+- Deduplication by message-id or UID
+
+4) Dashboard (metrics)
+- Add /api/metrics/summary returning: total, byStatus, byPriority, topIntents, trend(last30days)
+- Frontend /dashboard with two primary charts initially:
+  - Open vs Closed (donut)
+  - Priority distribution (bar)
+- Optional: trends (sparkline), top intents list, filters (date range)
+
+5) Reliability & security
+- Rate-limit webhooks
+- Signature verification
+- Idempotency keys
+- Background queue for heavy extraction (BullMQ/Redis)
+
+6) Tests & monitoring
+- Unit tests for parser and metrics
+- Integration tests for webhook route
+- Alerts for failed AI calls or DB errors
+
+
+
+Implementation note: start with Dashboard (metrics) to provide immediate value, then implement inbox ingestion using Twilio as the first source for a fast demo.
