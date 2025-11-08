@@ -65,6 +65,7 @@ export default function NavBar() {
 
 function LangButton() {
   const { lang, toggleLanguage } = useLanguage();
+  // when lang is 'en' show Arabic label to switch to Arabic; when 'ar' show English label
   const label = lang === 'en' ? 'العربية' : 'English';
   return (
     <button
