@@ -1,17 +1,17 @@
 const { Pool } = require('pg');
 require('dotenv').config();
 
+// ✅ Use connection string for Neon / Vercel deployments
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 5432,
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // ✅ Required by Neon
+  },
 });
 
-// Test connection
+// Log connection
 pool.on('connect', () => {
-  console.log('✅ Connected to PostgreSQL database');
+  console.log('✅ Connected to Neon PostgreSQL database');
 });
 
 pool.on('error', (err) => {
@@ -19,12 +19,11 @@ pool.on('error', (err) => {
   process.exit(-1);
 });
 
-// Initialize database schema
+// Initialize DB schema
 const initializeDatabase = async () => {
   try {
     const client = await pool.connect();
-    
-    // Create tickets table
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS tickets (
         id SERIAL PRIMARY KEY,
@@ -42,15 +41,14 @@ const initializeDatabase = async () => {
         reply_suggestion TEXT
       )
     `);
-    
-    // Create indexes for better query performance
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_tickets_status ON tickets(status);
       CREATE INDEX IF NOT EXISTS idx_tickets_priority ON tickets(priority);
       CREATE INDEX IF NOT EXISTS idx_tickets_language ON tickets(language);
       CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at);
     `);
-    
+
     client.release();
     console.log('✅ Database schema initialized');
   } catch (error) {
@@ -60,4 +58,3 @@ const initializeDatabase = async () => {
 };
 
 module.exports = { pool, initializeDatabase };
-
